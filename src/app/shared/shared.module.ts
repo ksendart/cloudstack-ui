@@ -84,6 +84,8 @@ import { CharacterCountComponent } from './components/character-count-textfield/
 // tslint:disable-next-line
 import { CreateUpdateDeleteDialogComponent } from './components/create-update-delete-dialog/create-update-delete-dialog.component';
 import { DescriptionComponent } from './components/description/description.component';
+import { DiskOfferingDialogComponent } from './components/disk-offering/disk-offering-dialog/disk-offering-dialog.component';
+import { DiskOfferingSelectorComponent } from './components/disk-offering/disk-offering-selector/disk-offering-selector.component';
 import { DividerVerticalComponent } from './components/divider-vertical/divider-vertical.component';
 import { GroupedListComponent } from './components/grouped-list/grouped-list.component';
 import { InlineEditComponent } from './components/inline-edit/inline-edit.component';
@@ -122,6 +124,7 @@ import {
 } from './pipes';
 import { AccountService } from './services/account.service';
 import { AffinityGroupService } from './services/affinity-group.service';
+import { ApiLogService } from './services/api-log.service';
 import { AsyncJobService } from './services/async-job.service';
 import { AuthGuard } from './services/auth-guard.service';
 import { AuthService } from './services/auth.service';
@@ -164,13 +167,6 @@ import { VolumeTagService } from './services/tags/volume-tag.service';
 import { UserService } from './services/user.service';
 import { VolumeService } from './services/volume.service';
 import { ZoneService } from './services/zone.service';
-import {
-  DiskOfferingSelectorComponent
-} from './components/disk-offering/disk-offering-selector/disk-offering-selector.component';
-import {
-  DiskOfferingDialogComponent
-} from './components/disk-offering/disk-offering-dialog/disk-offering-dialog.component';
-import { CustomServiceOfferingComponent } from '../service-offering/custom-service-offering/custom-service-offering.component';
 
 @NgModule({
   imports: [
@@ -366,6 +362,7 @@ import { CustomServiceOfferingComponent } from '../service-offering/custom-servi
     AccountService,
     AccountActionsService,
     AffinityGroupService,
+    ApiLogService,
     AsyncJobService,
     AuthGuard,
     AuthService,

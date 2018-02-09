@@ -8,6 +8,7 @@ import {
   MatButtonToggleModule,
   MatCheckboxModule,
   MatDialogModule,
+  MatExpansionModule,
   MatIconModule,
   MatInputModule,
   MatMenuModule,
@@ -21,6 +22,7 @@ import { EffectsModule } from '@ngrx/effects';
 import { StoreModule } from '@ngrx/store';
 import { TranslateModule } from '@ngx-translate/core';
 import { DynamicModule } from 'ng-dynamic-component';
+import { ClipboardModule } from 'ngx-clipboard/dist';
 import { PulseModule } from '../pulse/pulse.module';
 import { AccountTagsEffects } from '../reducers/account-tags/redux/account-tags.effects';
 import { accountTagsReducers } from '../reducers/account-tags/redux/account-tags.reducers';
@@ -59,6 +61,7 @@ import { VmService } from './shared/vm.service';
 import { VmAccessComponent } from './vm-actions/vm-actions-component/vm-access.component';
 import { VmActionsComponent } from './vm-actions/vm-actions-component/vm-actions.component';
 import { VmResetPasswordComponent } from './vm-actions/vm-reset-password-component/vm-reset-password.component';
+import { VmCreationApiLogComponent } from './vm-creation/api-log/vm-creation-api-log.component';
 // tslint:disable-next-line
 import { SecurityGroupManagerExistingGroupComponent } from './vm-creation/components/security-group-rules-manager/security-group-manager-existing-group/security-group-manager-existing-group.component';
 import { VmCreationSecurityGroupRulesManagerComponent } from './vm-creation/components/security-group-rules-manager/vm-creation-security-group-rules-manager.component';
@@ -129,6 +132,7 @@ import { WebShellService } from './web-shell/web-shell.service';
     CommonModule,
     DynamicModule.withComponents([VmListCardItemComponent]),
     DynamicModule.withComponents([VmListRowItemComponent]),
+    ClipboardModule,
     FormsModule,
     DraggableSelectModule,
     MatAutocompleteModule,
@@ -142,6 +146,7 @@ import { WebShellService } from './web-shell/web-shell.service';
     MatTabsModule,
     MatTooltipModule,
     MatButtonToggleModule,
+    MatExpansionModule,
     PulseModule,
     ReactiveFormsModule,
     RouterModule,
@@ -235,6 +240,7 @@ import { WebShellService } from './web-shell/web-shell.service';
     SecondaryIpListComponent,
     NicFieldsComponent,
     PostdeploymentComponent,
+    VmCreationApiLogComponent,
     VmResetPasswordComponent,
   ],
   providers: [
@@ -257,6 +263,7 @@ import { WebShellService } from './web-shell/web-shell.service';
     VmCreationSecurityGroupContainerComponent,
     VmCreationServiceOfferingContainerComponent,
     PostdeploymentComponent,
+    VmCreationApiLogComponent,
     VmResetPasswordComponent,
     VmAccessComponent,
     ServiceOfferingDialogContainerComponent

@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import { MarkForRemovalService } from './mark-for-removal.service';
 import { SecurityGroup, SecurityGroupType } from '../../../security-group/sg.model';
-import { TagService } from './tag.service';
+import { ApiLoggerStage, ApiLogService } from '../api-log.service';
 import { EntityTagService } from './entity-tag-service.interface';
+import { MarkForRemovalService } from './mark-for-removal.service';
 import { SecurityGroupTagKeys } from './security-group-tag-keys';
+import { TagService } from './tag.service';
 
 @Injectable()
 export class SecurityGroupTagService implements EntityTagService {
@@ -12,6 +13,7 @@ export class SecurityGroupTagService implements EntityTagService {
 
   constructor(
     private markForRemovalService: MarkForRemovalService,
+    private apiLogService: ApiLogService,
     protected tagService: TagService
   ) {}
 
@@ -29,12 +31,24 @@ export class SecurityGroupTagService implements EntityTagService {
   }
 
   public markAsPrivate(securityGroup: SecurityGroup): Observable<SecurityGroup> {
+    //todo
+    const apiMessageId = this.apiLogService.add({
+      request: ApiLoggerStage.CREATE_TAGS,
+      params: {
+        resourceIds: securityGroup.id,
+        resourceType: securityGroup.resourceType,
+        key: this.keys.type,
+        value: SecurityGroupType.Private
+      }
+    });
     return this.tagService.update(
       securityGroup,
       securityGroup.resourceType,
       this.keys.type,
       SecurityGroupType.Private
-    );
+    ).do((res) => {
+      this.apiLogService.update(apiMessageId, res);
+    });
   }
 
   public convertToShared(securityGroup: SecurityGroup): Observable<SecurityGroup> {

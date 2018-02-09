@@ -1,25 +1,26 @@
-import { VirtualMachineTagKeys } from '../../../shared/services/tags/vm-tag-keys';
-import { noGroup } from '../../../vm/vm-filter/vm-filter.component';
-import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
-import { VirtualMachine } from '../../../vm/shared/vm.model';
-import { InstanceGroup } from '../../../shared/models';
-import { VmCreationSecurityGroupData } from '../../../vm/vm-creation/security-group/vm-creation-security-group-data';
-import { Rules } from '../../../shared/components/security-group-builder/rules';
-import { Utils } from '../../../shared/services/utils/utils.service';
-import { VmCreationState } from '../../../vm/vm-creation/data/vm-creation-state';
-import { KeyboardLayout } from '../../../vm/vm-creation/keyboards/keyboards.component';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
 // tslint:disable-next-line
 import {
   ProgressLoggerMessage,
   ProgressLoggerMessageStatus
 } from '../../../shared/components/progress-logger/progress-logger-message/progress-logger-message';
+import { Rules } from '../../../shared/components/security-group-builder/rules';
+import { InstanceGroup } from '../../../shared/models';
+import { VirtualMachineTagKeys } from '../../../shared/services/tags/vm-tag-keys';
+import { Utils } from '../../../shared/services/utils/utils.service';
+import { VirtualMachine } from '../../../vm/shared/vm.model';
+import { VmCreationState } from '../../../vm/vm-creation/data/vm-creation-state';
+import { KeyboardLayout } from '../../../vm/vm-creation/keyboards/keyboards.component';
+import { VmCreationSecurityGroupData } from '../../../vm/vm-creation/security-group/vm-creation-security-group-data';
 import { NotSelectedSshKey } from '../../../vm/vm-creation/ssh-key-selector/ssh-key-selector.component';
+import { noGroup } from '../../../vm/vm-filter/vm-filter.component';
 
 import * as fromAccounts from '../../accounts/redux/accounts.reducers';
-import * as vmActions from './vm.actions';
-import * as fromSGroup from '../../security-groups/redux/sg.reducers';
 import * as affinityGroupActions from '../../affinity-groups/redux/affinity-groups.actions';
+import * as securityGroupActions from '../../security-groups/redux/sg.actions';
+import * as fromSGroup from '../../security-groups/redux/sg.reducers';
+import * as vmActions from './vm.actions';
 
 /**
  * @ngrx/entity provides a predefined interface for handling
@@ -49,6 +50,8 @@ export interface FormState {
   loading: boolean,
   showOverlay: boolean,
   deploymentInProgress: boolean,
+  //todo
+  isError: boolean,
   enoughResources: boolean,
   insufficientResources: Array<string>,
   loggerStageList: Array<ProgressLoggerMessage>,
@@ -345,6 +348,8 @@ export const initialFormState: FormState = {
   loading: false,
   showOverlay: false,
   deploymentInProgress: false,
+  //todo
+  isError: false,
   enoughResources: false,
   insufficientResources: [],
   loggerStageList: [],
@@ -392,7 +397,9 @@ export function formReducer(
       return {
         ...state,
         showOverlay: true,
-        deploymentInProgress: true
+        deploymentInProgress: true,
+        //todo
+        isError: false
       };
     }
     case vmActions.VM_DEPLOYMENT_INIT_ACTION_LIST: {
@@ -427,8 +434,8 @@ export function formReducer(
           return message;
         }
       });
-
-      return { ...state, loggerStageList: [...messages], deploymentInProgress: false };
+      //todo
+      return { ...state, loggerStageList: [...messages], deploymentInProgress: false, isError: true };
     }
     case vmActions.VM_DEPLOYMENT_COPY_TAGS: {
       return {
@@ -439,6 +446,10 @@ export function formReducer(
     case affinityGroupActions.LOAD_AFFINITY_GROUPS_RESPONSE: {
       const names = action.payload.map(_ => _.name);
       return { ...state, state: { ...state.state, affinityGroupNames: names } };
+    }
+    //todo
+    case securityGroupActions.CREATE_SECURITY_GROUPS_SUCCESS: {
+      return { ...state, state: { ...state.state, privateSecurityGroup: action.payload[0]} };
     }
     default: {
       return state;
@@ -473,6 +484,12 @@ export const insufficientResources = createSelector(
 export const deploymentInProgress = createSelector(
   getVmForm,
   state => state.deploymentInProgress
+);
+
+//todo
+export const isError = createSelector(
+  getVmForm,
+  state => state.isError
 );
 
 export const loggerStageList = createSelector(

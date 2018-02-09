@@ -3,21 +3,6 @@ import { MatDialogRef } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { State } from '../../../reducers';
-import {
-  AffinityGroup,
-  DiskOffering,
-  InstanceGroup,
-  ServiceOffering,
-  SSHKeyPair,
-  Zone
-} from '../../../shared/models';
-import { AccountResourceType } from '../../../shared/models/account.model';
-import { AuthService } from '../../../shared/services/auth.service';
-import { BaseTemplateModel } from '../../../template/shared';
-import { VmService } from '../../shared/vm.service';
-import { NotSelected, VmCreationState } from '../data/vm-creation-state';
-import { KeyboardLayout } from '../keyboards/keyboards.component';
-import { VmCreationSecurityGroupData } from '../security-group/vm-creation-security-group-data';
 
 import * as accountTagsActions from '../../../reducers/account-tags/redux/account-tags.actions';
 import * as affinityGroupActions from '../../../reducers/affinity-groups/redux/affinity-groups.actions';
@@ -37,6 +22,21 @@ import * as vmActions from '../../../reducers/vm/redux/vm.actions';
 import * as fromVMs from '../../../reducers/vm/redux/vm.reducers';
 import * as zoneActions from '../../../reducers/zones/redux/zones.actions';
 import * as fromZones from '../../../reducers/zones/redux/zones.reducers';
+import {
+  AffinityGroup,
+  DiskOffering,
+  InstanceGroup,
+  ServiceOffering,
+  SSHKeyPair,
+  Zone
+} from '../../../shared/models';
+import { AccountResourceType } from '../../../shared/models/account.model';
+import { AuthService } from '../../../shared/services/auth.service';
+import { BaseTemplateModel } from '../../../template/shared';
+import { VmService } from '../../shared/vm.service';
+import { NotSelected, VmCreationState } from '../data/vm-creation-state';
+import { KeyboardLayout } from '../keyboards/keyboards.component';
+import { VmCreationSecurityGroupData } from '../security-group/vm-creation-security-group-data';
 
 @Component({
   selector: 'cs-vm-create-container',
@@ -52,6 +52,7 @@ import * as fromZones from '../../../reducers/zones/redux/zones.reducers';
       [zones]="zones$ | async"
       [showOverlay]="showOverlay$ | async"
       [deploymentInProgress]="deploymentInProgress$ | async"
+      [isError]="isError$ | async"
       [deployedVm]="deployedVm$ | async"
       [enoughResources]="enoughResources$ | async"
       [insufficientResources]="insufficientResources$ | async"
@@ -94,6 +95,7 @@ export class VmCreationContainerComponent implements OnInit {
   readonly customOfferingRestrictions$ = this.store.select(fromServiceOfferings.getCustomRestrictionsForVmCreation);
   readonly showOverlay$ = this.store.select(fromVMs.showOverlay);
   readonly deploymentInProgress$ = this.store.select(fromVMs.deploymentInProgress);
+  readonly isError$ = this.store.select(fromVMs.isError);
   readonly diskOfferings$ = this.store.select(fromDiskOfferings.selectAll);
   readonly diskOfferingsAreLoading$ = this.store.select(fromDiskOfferings.isLoading);
   readonly deployedVm$ = this.store.select(fromVMs.getDeployedVM);

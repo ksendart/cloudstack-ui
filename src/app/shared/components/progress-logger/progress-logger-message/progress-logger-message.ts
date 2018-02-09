@@ -18,3 +18,11 @@ export interface ProgressLoggerMessage {
   text: string | ParametrizedTranslation;
   status?: Array<ProgressLoggerMessageStatus>;
 }
+
+//todo
+export interface ApiLoggerMessage {
+  id?: string;
+  request: string;
+  params: any;
+  response?: any;
+}

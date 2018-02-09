@@ -30,7 +30,9 @@ export class AffinityGroupService extends BaseBackendCachedService<AffinityGroup
 
   public create(params: AffinityGroupCreationData): Observable<AffinityGroup> {
     return super.create(params)
-      .switchMap(job => this.asyncJob.queryJob(job.jobid, this.entity, this.entityModel));
+      .switchMap(job => this.asyncJob.queryJob(job.jobid, this.entity, this.entityModel))
+      //todo
+      .map(res => res.jobresult.affinitygroup);
   }
 
   public updateForVm(

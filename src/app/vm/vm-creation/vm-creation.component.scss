@@ -5,13 +5,10 @@
 
 :host .overlay {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 50vh;
 
-  .message {
-    position: static;
-    transform: none;
+  .creation-message {
+    height: auto;
+    margin: auto;
   }
 
   mat-progress-bar {
@@ -25,8 +22,14 @@
   }
 
   .mat-dialog-content {
-    overflow: visible;
+    overflow: auto;
+    display: flex;
+    max-height: 50vh;
   }
+}
+
+cs-vm-creation-api-log {
+  width: 100%;
 }
 
 .vm-creation-container {
@@ -46,6 +49,7 @@
 .container {
   display: flex;
   padding: 15px 0;
+  width: 100%;
   justify-content: space-between;
   overflow: auto;
 }
@@ -121,7 +125,7 @@ mat-progress-bar {
   margin-top: 10px;
 }
 
-.message {
+.creation-message {
   line-height: 1.4 !important;
 }
 

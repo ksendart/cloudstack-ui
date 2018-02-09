@@ -1,55 +1,56 @@
 import { Injectable } from '@angular/core';
+import { MatDialog } from '@angular/material';
+import { Actions, Effect } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
+import { Observable } from 'rxjs/Observable';
+import { ParametrizedTranslation } from '../../../dialog/dialog-service/dialog.service';
+import { NetworkRule } from '../../../security-group/network-rule.model';
+import { SecurityGroup } from '../../../security-group/sg.model';
+import {
+  ProgressLoggerMessageData,
+  ProgressLoggerMessageStatus
+} from '../../../shared/components/progress-logger/progress-logger-message/progress-logger-message';
 import { Rules } from '../../../shared/components/security-group-builder/rules';
-import { BaseTemplateModel } from '../../../template/shared';
 import {
   AffinityGroupType,
   DiskOffering,
   ServiceOffering,
   Zone
 } from '../../../shared/models';
-import { Observable } from 'rxjs/Observable';
-import { TemplateResourceType } from '../../../template/shared/base-template.service';
-import { Actions, Effect } from '@ngrx/effects';
+import { AffinityGroupService } from '../../../shared/services/affinity-group.service';
+import { ApiLoggerStage, ApiLogService } from '../../../shared/services/api-log.service';
+import { AuthService } from '../../../shared/services/auth.service';
+import { InstanceGroupService } from '../../../shared/services/instance-group.service';
+import { JobsNotificationService } from '../../../shared/services/jobs-notification.service';
+import { ResourceUsageService } from '../../../shared/services/resource-usage.service';
+import { TagService } from '../../../shared/services/tags/tag.service';
+import { TemplateTagService } from '../../../shared/services/tags/template-tag.service';
+import { UserTagService } from '../../../shared/services/tags/user-tag.service';
+import { VirtualMachineTagKeys } from '../../../shared/services/tags/vm-tag-keys';
+import { VmTagService } from '../../../shared/services/tags/vm-tag.service';
 import { Utils } from '../../../shared/services/utils/utils.service';
-import { ParametrizedTranslation } from '../../../dialog/dialog-service/dialog.service';
-import {
-  ProgressLoggerMessageData,
-  ProgressLoggerMessageStatus
-} from '../../../shared/components/progress-logger/progress-logger-message/progress-logger-message';
+import { BaseTemplateModel } from '../../../template/shared';
+import { TemplateResourceType } from '../../../template/shared/base-template.service';
+import { VirtualMachine, VmResourceType, VmState } from '../../../vm/shared/vm.model';
+import { VmService } from '../../../vm/shared/vm.service';
 import {
   NotSelected,
   VmCreationState
 } from '../../../vm/vm-creation/data/vm-creation-state';
 import { VmCreationSecurityGroupData } from '../../../vm/vm-creation/security-group/vm-creation-security-group-data';
+import { VmCreationSecurityGroupMode } from '../../../vm/vm-creation/security-group/vm-creation-security-group-mode';
+import { VmCreationSecurityGroupService } from '../../../vm/vm-creation/services/vm-creation-security-group.service';
 // tslint:disable-next-line
 import { VmCreationAgreementComponent } from '../../../vm/vm-creation/template/agreement/vm-creation-agreement.component';
-import { VmService } from '../../../vm/shared/vm.service';
-import { MatDialog } from '@angular/material';
-import { AuthService } from '../../../shared/services/auth.service';
+import * as fromDiskOfferings from '../../disk-offerings/redux/disk-offerings.reducers';
 import { State } from '../../index';
-import { JobsNotificationService } from '../../../shared/services/jobs-notification.service';
-import { TemplateTagService } from '../../../shared/services/tags/template-tag.service';
-import { ResourceUsageService } from '../../../shared/services/resource-usage.service';
-import { AffinityGroupService } from '../../../shared/services/affinity-group.service';
-import { VmCreationSecurityGroupService } from '../../../vm/vm-creation/services/vm-creation-security-group.service';
-import { InstanceGroupService } from '../../../shared/services/instance-group.service';
-import { VirtualMachineTagKeys } from '../../../shared/services/tags/vm-tag-keys';
-import { TagService } from '../../../shared/services/tags/tag.service';
-import { UserTagService } from '../../../shared/services/tags/user-tag.service';
-import { VmTagService } from '../../../shared/services/tags/vm-tag.service';
-import { NetworkRule } from '../../../security-group/network-rule.model';
-import { VmCreationSecurityGroupMode } from '../../../vm/vm-creation/security-group/vm-creation-security-group-mode';
-import { SecurityGroup } from '../../../security-group/sg.model';
-import { VirtualMachine, VmResourceType, VmState } from '../../../vm/shared/vm.model';
+import * as securityGroupActions from '../../security-groups/redux/sg.actions';
+import * as fromSecurityGroups from '../../security-groups/redux/sg.reducers';
+import * as fromServiceOfferings from '../../service-offerings/redux/service-offerings.reducers';
+import * as fromTemplates from '../../templates/redux/template.reducers';
 
 import * as fromZones from '../../zones/redux/zones.reducers';
 import * as vmActions from './vm.actions';
-import * as securityGroupActions from '../../security-groups/redux/sg.actions';
-import * as fromServiceOfferings from '../../service-offerings/redux/service-offerings.reducers';
-import * as fromDiskOfferings from '../../disk-offerings/redux/disk-offerings.reducers';
-import * as fromSecurityGroups from '../../security-groups/redux/sg.reducers';
-import * as fromTemplates from '../../templates/redux/template.reducers';
 import * as fromVMs from './vm.reducers';
 
 interface VmCreationParams {
@@ -87,7 +88,6 @@ export enum VmDeploymentStage {
   TAG_COPYING = 'TAG_COPYING',
   TAG_COPYING_FINISHED = 'TAG_COPYING_FINISHED'
 }
-
 
 export interface VmDeploymentMessage {
   stage: VmDeploymentStage;
@@ -253,9 +253,12 @@ export class VirtualMachineCreationEffects {
   deploying$ = this.actions$
     .ofType(vmActions.VM_DEPLOYMENT_REQUEST)
     .switchMap((action: vmActions.DeploymentRequest) => {
+    //todo
+      this.apiLogService.resetLog();
       return this.doCreateAffinityGroup(action.payload)
         .switchMap(() => this.doCreateSecurityGroup(action.payload)
           .switchMap((securityGroups) => {
+            //todo
             if (action.payload.securityGroupData.mode === VmCreationSecurityGroupMode.Builder) {
               this.store.dispatch(new securityGroupActions.CreateSecurityGroupsSuccess(securityGroups));
             }
@@ -267,9 +270,18 @@ export class VirtualMachineCreationEffects {
             const params = this.getVmCreationParams(action.payload, securityGroups);
             let deployResponse;
 
+            //todo
+            const messageId = this.apiLogService.add({
+              request: ApiLoggerStage.DEPLOY_VM,
+              params
+            });
+
             return this.vmService.deploy(params)
               .switchMap(response => {
                 deployResponse = response;
+
+                //todo
+                this.apiLogService.update(messageId, deployResponse);
                 return this.vmService.get(deployResponse.id);
               })
               .switchMap(vm => {
@@ -341,6 +353,8 @@ export class VirtualMachineCreationEffects {
     private actions$: Actions,
     private vmService: VmService,
     private jobsNotificationService: JobsNotificationService,
+    //todo
+    private apiLogService: ApiLogService,
     private templateTagService: TemplateTagService,
     private dialog: MatDialog,
     private auth: AuthService,
@@ -548,15 +562,22 @@ export class VirtualMachineCreationEffects {
   private doCreateAffinityGroup(state: VmCreationState) {
     if (this.createAffinityGroup(state)) {
       this.handleDeploymentMessages({ stage: VmDeploymentStage.AG_GROUP_CREATION });
-
-      return this.affinityGroupService.create({
+      //todo
+      const affinityGroupParams = {
         name: state.affinityGroup.name,
         type: AffinityGroupType.hostAntiAffinity
-      })
-        .map(() => {
+      };
+      const messageId = this.apiLogService.add({
+        request: ApiLoggerStage.CREATE_AG,
+        params: affinityGroupParams
+      });
+
+      return this.affinityGroupService.create(affinityGroupParams)
+        .map((res) => {
           this.store.dispatch(new vmActions.DeploymentChangeStatus({
             stage: VmDeploymentStage.AG_GROUP_CREATION_FINISHED
           }));
+          this.apiLogService.update(messageId, res);
           this.store.dispatch(new vmActions.VmFormUpdate({
             affinityGroupNames: [...state.affinityGroupNames, state.affinityGroup.name]
           }));
@@ -596,6 +617,13 @@ export class VirtualMachineCreationEffects {
   private doCopyTags(vm: VirtualMachine, state: VmCreationState): Observable<VirtualMachine> {
     this.handleDeploymentMessages({ stage: VmDeploymentStage.TAG_COPYING });
     return this.vmTagService.copyTagsToEntity(state.template.tags, vm)
+      .do(() => {
+        //todo
+        state.template.tags.map(tag => this.apiLogService.add({
+          request: ApiLoggerStage.CREATE_TAGS,
+          params: { key: tag.key, value: tag.value }
+        }));
+      })
       .switchMap(() => {
         return this.userTagService.getSavePasswordForAllVms();
       })
@@ -606,14 +634,29 @@ export class VirtualMachineCreationEffects {
             VmResourceType,
             VirtualMachineTagKeys.passwordTag,
             vm.password
-          );
+          ).do((res) => {
+            //todo
+            this.apiLogService.add({
+              request: ApiLoggerStage.CREATE_TAGS,
+              params: { key: VirtualMachineTagKeys.passwordTag, value: vm.password },
+              response: res
+            });
+          });
         } else {
           return Observable.of(null);
         }
       })
       .switchMap(() => {
         if (state.agreement) {
-          return this.vmTagService.setAgreement(vm);
+          return this.vmTagService.setAgreement(vm)
+            .do((res) => {
+            //todo
+              this.apiLogService.add({
+                request: ApiLoggerStage.CREATE_TAGS,
+                params: { key: VirtualMachineTagKeys.agreementAccepted, value: true },
+                response: res
+              });
+            });
         } else {
           return Observable.of(null);
         }

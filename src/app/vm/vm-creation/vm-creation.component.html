@@ -1,6 +1,6 @@
 <ng-container *ngIf="showOverlay">
   <div class="overlay mat-dialog-content">
-    <div class="message">
+    <div class="creation-message">
       <cs-progress-logger
         [messages]="loggerStageList"
       ></cs-progress-logger>
@@ -9,6 +9,7 @@
         mode="indeterminate"
         [class.progress-hidden]="!deploymentInProgress"
       ></mat-progress-bar>
+      <cs-vm-creation-api-log *ngIf="isError"></cs-vm-creation-api-log>
       <cs-postdeployment-dialog
         *ngIf="!deploymentInProgress && deployedVm"
         [vm]="deployedVm"

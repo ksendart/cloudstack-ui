@@ -1,13 +1,14 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import { NetworkProtocol, NetworkRule } from '../../network-rule.model';
-import { NetworkRuleType, SecurityGroup } from '../../sg.model';
+import { Rules } from '../../../shared/components/security-group-builder/rules';
+import { BackendResource } from '../../../shared/decorators/backend-resource.decorator';
+import { ApiLoggerStage, ApiLogService } from '../../../shared/services/api-log.service';
 import { BaseBackendService } from '../../../shared/services/base-backend.service';
 import { SecurityGroupTagService } from '../../../shared/services/tags/security-group-tag.service';
+import { NetworkProtocol, NetworkRule } from '../../network-rule.model';
+import { NetworkRuleType, SecurityGroup } from '../../sg.model';
 import { NetworkRuleService } from '../network-rule.service';
-import { BackendResource } from '../../../shared/decorators/backend-resource.decorator';
-import { Rules } from '../../../shared/components/security-group-builder/rules';
-import { HttpClient } from '@angular/common/http';
 
 
 interface TcpUdpNetworkRuleCreationParams {
@@ -37,7 +38,8 @@ export abstract class SecurityGroupCreationService extends BaseBackendService<Se
   constructor(
     protected securityGroupTagService: SecurityGroupTagService,
     protected http: HttpClient,
-    private networkRuleService: NetworkRuleService
+    private networkRuleService: NetworkRuleService,
+    private apiLogService: ApiLogService
   ) {
     super(http);
   }
@@ -49,7 +51,11 @@ export abstract class SecurityGroupCreationService extends BaseBackendService<Se
       ingressRulesWithPossibleDuplicates);
     const egressRules = this.networkRuleService.removeDuplicateRules(
       egressRulesWithPossibleDuplicates);
-
+    //todo
+    this.apiLogService.add({
+      request: ApiLoggerStage.CREATE_SG,
+      params: data
+    });
     return this.create(data)
       .switchMap(securityGroup => {
         return this.authorizeRules(securityGroup, ingressRules, egressRules);
@@ -86,6 +92,19 @@ export abstract class SecurityGroupCreationService extends BaseBackendService<Se
 
     const ruleCreationRequests = ingressRuleCreationRequests.concat(
       egressRuleCreationRequests);
+    //todo
+    ingressRules.map(rule => {
+      this.apiLogService.add({
+        request: ApiLoggerStage.CREATE_INGRESS_RULE,
+        params: rule
+      });
+    });
+    egressRules.map(rule => {
+      this.apiLogService.add({
+        request: ApiLoggerStage.CREATE_EGRESS_RULE,
+        params: rule
+      });
+    });
 
     return Observable.forkJoin(ruleCreationRequests).map(() => securityGroup);
   }

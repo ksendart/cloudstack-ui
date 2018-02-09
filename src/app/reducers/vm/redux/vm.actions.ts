@@ -1,7 +1,10 @@
 import { Action } from '@ngrx/store';
 import { ParametrizedTranslation } from '../../../dialog/dialog-service/dialog.service';
 // tslint:disable-next-line
-import { ProgressLoggerMessageData } from '../../../shared/components/progress-logger/progress-logger-message/progress-logger-message';
+import {
+  ProgressLoggerMessageData,
+  ApiLoggerMessage
+} from '../../../shared/components/progress-logger/progress-logger-message/progress-logger-message';
 import {
   Color,
   InstanceGroup,
@@ -67,6 +70,7 @@ export const VM_DEPLOYMENT_REQUEST_ERROR = '[VM deployment] VM_DEPLOYMENT_REQUES
 export const VM_DEPLOYMENT_CHANGE_STATUS = '[VM deployment] VM_DEPLOYMENT_CHANGE_STATUS';
 export const VM_DEPLOYMENT_ADD_LOGGER_MESSAGE = '[VM deployment] VM_DEPLOYMENT_ADD_LOGGER_MESSAGE';
 export const VM_DEPLOYMENT_UPDATE_LOGGER_MESSAGE = '[VM deployment] VM_DEPLOYMENT_UPDATE_LOGGER_MESSAGE';
+export const VM_DEPLOYMENT_UPDATE_API_LOGGER_MESSAGE = '[VM deployment] VM_DEPLOYMENT_UPDATE_API_LOGGER_MESSAGE';
 export const VM_DEPLOYMENT_INIT_ACTION_LIST = '[VM deployment] VM_DEPLOYMENT_INIT_ACTION_LIST';
 export const VM_DEPLOYMENT_COPY_TAGS = '[VM deployment] VM_DEPLOYMENT_COPY_TAGS';
 
@@ -443,6 +447,14 @@ export class DeploymentUpdateLoggerMessage implements Action {
     messageText: string | ParametrizedTranslation,
     data: Partial<ProgressLoggerMessageData>
   }) {
+  }
+}
+
+//todo
+export class DeploymentUpdateApiLoggerMessage implements Action {
+  type = VM_DEPLOYMENT_UPDATE_API_LOGGER_MESSAGE;
+
+  constructor(public payload: ApiLoggerMessage) {
   }
 }
 
