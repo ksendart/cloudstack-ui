@@ -1,5 +1,4 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { Injectable } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 // tslint:disable-next-line
 import { PrivateSecurityGroupCreationService } from '../../../security-group/services/creation-services/private-security-group-creation.service';
@@ -9,6 +8,7 @@ import { SharedSecurityGroupCreationService } from '../../../security-group/serv
 import { TemplateSecurityGroupCreationService } from '../../../security-group/services/creation-services/template-security-group-creation.service';
 import { NetworkRuleService } from '../../../security-group/services/network-rule.service';
 import { SecurityGroupService } from '../../../security-group/services/security-group.service';
+import { ApiLogService } from '../../../shared/services/api-log.service';
 import { AsyncJobService } from '../../../shared/services/async-job.service';
 import { ConfigService } from '../../../shared/services/config.service';
 import { MarkForRemovalService } from '../../../shared/services/tags/mark-for-removal.service';
@@ -32,6 +32,7 @@ describe('VM creation security group service', () => {
         MarkForRemovalService,
         TagService,
         AsyncJobService,
+        ApiLogService,
         NetworkRuleService
       ],
       imports: [
